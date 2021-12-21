@@ -34,10 +34,28 @@ message LongGreetReponse{
     string result = 1;
 }
 
+message  GreetEveryoneRequest{
+    Greeting greeting = 1;
+}
+
+message GreetEveryoneReponse{
+    string result = 1;
+}
+
+message GreetWithDeadlineRequest{
+    Greeting greeting = 1;
+}
+
+message GreetWithDeadlineResponse{
+    string result = 1;
+}
+
 service GreetService{
     // Unary
     rpc Greet(GreetRequest) returns (GreetResponse){};
     rpc GreetManyTimes(GreetManyTimesRequest) returns (stream GreetManyTimesResponse){};
     rpc LongGreet(stream LongGreetRequest) returns (LongGreetReponse){};
+    rpc GreetEveryone(stream GreetEveryoneRequest) returns (stream GreetEveryoneReponse){};
+    rpc GreetWithDeadline(GreetWithDeadlineRequest) returns (GreetWithDeadlineResponse){};
 }
 

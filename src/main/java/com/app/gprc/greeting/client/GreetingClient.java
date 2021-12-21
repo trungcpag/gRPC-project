@@ -1,10 +1,10 @@
 package com.app.gprc.greeting.client;
 
 import com.proto.greet.*;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.*;
 import io.grpc.stub.StreamObserver;
 
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -21,12 +21,14 @@ public class GreetingClient {
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50051)
                 .usePlaintext()
                 .build();
-        doClientStreamingCall(channel);
+//        doClientStreamingCall(channel);//
+//        doBiDiStreamingCall(channel);
+        doUnaryCallWithDeadline(channel);
     }
 
-    private void doClientStreamingCall(ManagedChannel channel){
+    private void doClientStreamingCall(ManagedChannel channel) {
 
-        GreetServiceGrpc.GreetServiceStub  asynclient = GreetServiceGrpc.newStub(channel);
+        GreetServiceGrpc.GreetServiceStub asynclient = GreetServiceGrpc.newStub(channel);
 
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -84,4 +86,82 @@ public class GreetingClient {
 
         channel.shutdown();
     }
+
+    private void doBiDiStreamingCall(ManagedChannel channel) {
+        System.out.println("Create stub");
+        GreetServiceGrpc.GreetServiceStub asyncClient = GreetServiceGrpc.newStub(channel);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<GreetEveryoneRequest> requestStreamObserver = asyncClient.greetEveryone(new StreamObserver<GreetEveryoneReponse>() {
+            @Override
+            public void onNext(GreetEveryoneReponse value) {
+                System.out.println("Response from server: " + value.getResult());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                System.out.println("Server is done sending data");
+                latch.countDown();
+            }
+        });
+
+        Arrays.asList("Trung", "John", "Marc").forEach(
+                name -> {
+                    System.out.println("sending: " + name);
+                    requestStreamObserver.onNext(GreetEveryoneRequest.newBuilder()
+                            .setGreeting(Greeting.newBuilder().setFirstName(name).build()).build());
+                }
+        );
+
+        requestStreamObserver.onCompleted();
+        try {
+            latch.await(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void doUnaryCallWithDeadline(ManagedChannel channel) {
+        System.out.println("Create stub");
+        GreetServiceGrpc.GreetServiceBlockingStub greetClient = GreetServiceGrpc.newBlockingStub(channel);
+
+        try {
+            System.out.println("send message with 5000 ms");
+            GreetWithDeadlineResponse response = greetClient.withDeadline(Deadline.after(5000, TimeUnit.SECONDS))
+                    .greetWithDeadline(GreetWithDeadlineRequest.newBuilder().setGreeting(
+                            Greeting.newBuilder().setFirstName("Trung").getDefaultInstanceForType()
+                    ).build());
+
+            System.out.println(response);
+        } catch (StatusRuntimeException e) {
+            if(e.getStatus() == Status.DEADLINE_EXCEEDED){
+                System.out.println("Deadline have been exceeded, we don't want the response");
+            } else {
+                e.printStackTrace();
+            }
+        }
+        try {
+            System.out.println("send message with 100 ms");
+            GreetWithDeadlineResponse response = greetClient.withDeadline(Deadline.after(100, TimeUnit.MILLISECONDS ))
+                    .greetWithDeadline(GreetWithDeadlineRequest.newBuilder().setGreeting(
+                            Greeting.newBuilder().setFirstName("Trung").getDefaultInstanceForType()
+                    ).build());
+
+            System.out.println(response);
+        } catch (StatusRuntimeException e) {
+            if(e.getStatus() == Status.DEADLINE_EXCEEDED){
+                System.out.println("Deadline have been exceeded, we don't want the response");
+            } else {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
 }
