@@ -16,7 +16,7 @@ import org.bson.Document;
 
 public class BlogServerIml extends BlogServiceGrpc.BlogServiceImplBase {
 
-    private MongoClient mongoClient = MongoClients.create("mongodb+srv://trung:12345@grpc.ad9xe.mongodb.net");
+    private MongoClient mongoClient = MongoClients.create("mongodb+srv://grpc.ad9xe.mongodb.net");
     private MongoDatabase database = mongoClient.getDatabase("mydb");
     private MongoCollection<Document> collection = database.getCollection("blog");
 
