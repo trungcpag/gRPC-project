@@ -2,6 +2,7 @@ package com.app.gprc.greeting.server;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.protobuf.services.ProtoReflectionService;
 
 import java.io.IOException;
 
@@ -11,6 +12,7 @@ public class GreetingServer {
         System.out.println("gRPC");
         Server server = ServerBuilder.forPort(50051)
                 .addService(new GreetServiceImpl())
+                .addService(ProtoReflectionService.newInstance())
                 .build();
         server.start();
         Runtime.getRuntime().addShutdownHook(new Thread(() ->{

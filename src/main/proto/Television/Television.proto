@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package person;
+
+
+option java_multiple_files = true;
+option java_package = "com.proto.television";
+
+// v1
+
+//message Television{
+//    string brand = 1;
+//    int32 year = 2;
+//}
+
+//v2
+message Television{
+    string brand = 1;
+    int32 model = 2;
+    Type type = 3;
+}
+
+enum Type{
+    HD = 0;
+    UHD = 1;
+    OLED = 2;
+}
+

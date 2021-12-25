@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package person;
+
+import "common/car.proto";
+
+option java_multiple_files = true;
+option java_package = "com.proto.person";
+
+message Address{
+    string street = 1;
+    string city = 2;
+}
+
+message Person {
+    string name = 1; // 1 is tag
+    int32 age = 2;
+    Address address = 3;
+    repeated common.Car car = 4;
+}
+
+// if json
+// "name": "sam"
+// "age": 1
+
+// proto
+// 1=sam
+// 2=10
+
+message Dealer {
+    map<int32, common.Car> model = 1;
+}
+

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package common;
+
+import "google/protobuf/wrappers.proto";
+option java_multiple_files = true;
+option java_package = "com.proto.person";
+
+message Car{
+    string make = 1;
+    string model = 2;
+    // wrapper
+    google.protobuf.Int32Value year = 3;
+    BodyStyle body_style = 4;
+}
+
+
+enum BodyStyle{
+    SEDAN = 0;
+    COUPE = 1;
+    SUV = 2;
+}
